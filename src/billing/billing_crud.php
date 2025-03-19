@@ -24,10 +24,10 @@ class BillingCrud {
     }
 
      /**
-     * Creates the contract table in the database if it does not already exist.
+     * Creates the billing table in the database if it does not already exist.
      * 
-     * This method checks if the `contract` table exists in the database, 
-     * and if not, it creates the table with the necessary columns.
+     * This method checks if the `billing` table exists in the database. 
+     * If not, it creates the table with the necessary columns.
      * 
      * @return void
      */
@@ -43,12 +43,13 @@ class BillingCrud {
     }
 
     /**
-     * Creates a new contract in the database.
+     * Creates a new billing record in the database.
      * 
-     * This method inserts a new contract into the `contract` table with the provided contract details.
+     * This method inserts a new billing record into the `billing` table using the provided 
+     * Billing object..
      * 
-     * @param Contract $contract The contract object to be created.
-     * @return bool Returns true if the contract was successfully created, false otherwise.
+     * @param Billing $billing The billing object to be created.
+     * @return bool Returns true if the billing record was successfully created, false otherwise.
      */
     public function createBilling(Billing $billing):bool {
         $sql = '
@@ -72,12 +73,13 @@ class BillingCrud {
     }
 
     /**
-     * Updates an existing contract in the database.
+     * Updates an existing billing in the database.
      * 
-     * This method updates an existing contract in the `contract` table with the provided contract details.
+     * This method updates an existing billing in the `billing` table with the provided
+     * Billing object, based on the record's ID.
      * 
-     * @param Contract $contract The contract object to be updated.
-     * @return bool Returns true if the contract was successfully updated, false otherwise.
+     * @param Billing $billing The billing object to be updated.
+     * @return bool Returns true if the billing record was successfully updated, false otherwise.
      */
     public function updateBilling(Billing $billing): bool {
         $sql = "
@@ -98,12 +100,12 @@ class BillingCrud {
     }
 
     /**
-     * Deletes a contract from the database by its ID.
+     *  Deletes a billing from the database by its ID.
      * 
-     * This method deletes a contract from the `contract` table based on the provided contract ID.
+     * This method deletes a billing from the `billing` table based on the provided billing ID.
      * 
-     * @param int $id The ID of the contract to be deleted.
-     * @return bool Returns true if the contract was successfully deleted, false otherwise.
+     * @param int $id The ID of the billing record to be deleted.
+     * @return bool Returns true if the billing was successfully deleted, false otherwise.
      */
     public function deleteBilling(int $id): bool {
         $sql = "
@@ -122,12 +124,12 @@ class BillingCrud {
     }
 
     /**
-     * Finds a contract by its ID.
+     * Finds a billing by its ID.
      * 
-     * This method retrieves a contract from the `contract` table based on the provided contract ID.
+     * This method retrieves a billing from the `billing` table based on the provided billing ID.
      * 
-     * @param int $id The ID of the contract to be retrieved.
-     * @return ?Billing Returns the contract object if found, null otherwise.
+     * @param int $id The ID of the billing to be retrieved.
+     * @return ?Billing Returns the billing object if found, null otherwise.
      */
     public function findBillingById(int $id): ?Billing {
         $sql = "
