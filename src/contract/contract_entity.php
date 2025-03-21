@@ -10,42 +10,75 @@ class Contract {
     /**
      * @var int|null $id The unique identifier for the contract.
      */
-    private $id;
+    private ?int $id = null;
 
     /**
      * @var string $vehicleUid The unique identifier for the vehicle.
      */
-    private $vehicleUid;
+    private string $vehicleUid = '';
 
     /**
      * @var string $customerUid The unique identifier for the customer.
      */
-    private $customerUid;
+    private string $customerUid = '';
 
     /**
      * @var DateTime $signDatetime The date and time when the contract was signed.
      */
-    private $signDatetime;
+    private ?DateTime $signDatetime = null;
 
     /**
      * @var DateTime $locBeginDatetime The date and time when the location rental begins.
      */
-    private $locBeginDatetime;
+    private ?DateTime $locBeginDatetime = null;
 
     /**
      * @var DateTime $locEndDatetime The date and time when the location rental ends.
      */
-    private $locEndDatetime;
+    private ?DateTime $locEndDatetime = null;
 
     /**
      * @var DateTime|null $returningDatetime The date and time when the vehicle is returned (nullable).
      */
-    private $returningDatetime;
+    private ?DateTime $returningDatetime = null;
 
     /**
      * @var float $price The total price of the contract.
      */
-    private $price;
+    private float $price = 0.0;
+
+    /**
+     * Contract class constructor.
+     *
+     * @param array $data (optional) An associative array containing values to populate the object.
+     *                    The keys should match the database column names (snake_case).
+     */
+    public function __construct(array $data = []) {
+        $this->hydrate($data);
+    }
+
+    /**
+     * Populates the object with an associative array of data.
+     *
+     * @param array $data Associative array containing values to hydrate the object.
+     *                    The keys must be in **snake_case** (e.g., `vehicle_uid`).
+     */
+    public function hydrate(array $data): void {
+        foreach ($data as $key => $value) {
+            // Convert snake_case to camelCase (e.g., vehicle_uid -> vehicleUid)
+            $camelCaseKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+    
+            // Find the setter
+            $method = 'set' . ucfirst($camelCaseKey); 
+            
+            if (method_exists($this, $method)) {
+                if (str_contains($camelCaseKey, 'Datetime') && !is_null($value) && !($value instanceof DateTime)) {
+                    $value = new DateTime($value);
+                }
+                $this->$method($value);
+            }
+        }
+    }
 
     // Getters
    /**
@@ -107,7 +140,7 @@ class Contract {
      * 
      * @return DateTime|null The date and time when the vehicle is returned, or null if not set.
      */
-    public function getReturningDatetime(): DateTime {
+    public function getReturningDatetime(): ?DateTime {
         return $this->returningDatetime;
     }
 
@@ -153,7 +186,7 @@ class Contract {
      * 
      * @param DateTime $signDatetime The date and time when the contract was signed.
      */
-    public function setSignDatetime(DateTime $signDatetime): void {
+    public function setSignDatetime($signDatetime): void {
         $this->signDatetime = $signDatetime;
     }
 
@@ -162,7 +195,7 @@ class Contract {
      * 
      * @param DateTime $locBeginDatetime The date and time when the location rental begins.
      */
-    public function setLocBeginDatetime(DateTime $locBeginDatetime): void {
+    public function setLocBeginDatetime($locBeginDatetime): void {
         $this->locBeginDatetime = $locBeginDatetime;
     }
 
@@ -171,7 +204,7 @@ class Contract {
      * 
      * @param DateTime $locEndDatetime The date and time when the location rental ends.
      */
-    public function setLocEndDatetime(DateTime $locEndDatetime): void {
+    public function setLocEndDatetime($locEndDatetime): void {
         $this->locEndDatetime = $locEndDatetime;
     }
 
@@ -180,7 +213,7 @@ class Contract {
      * 
      * @param DateTime|null $returningDatetime The date and time when the vehicle is returned, or null if not set.
      */
-    public function setReturningDatetime(?DateTime $returningDatetime): void {
+    public function setReturningDatetime($returningDatetime): void {
         $this->returningDatetime = $returningDatetime;
     }
 
