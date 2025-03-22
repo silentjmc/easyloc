@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../database/mysql_connection.php';
 require_once __DIR__ . '/billing_entity.php';
+require_once __DIR__ . '/../contract/contract_entity.php';
 
 /**
  * Class BillingCrud
@@ -124,14 +125,14 @@ class BillingCrud {
     }
 
     /**
-     * Finds a billing by its ID.
+     * Retreive a billing by its ID.
      * 
      * This method retrieves a billing from the `billing` table based on the provided billing ID.
      * 
      * @param int $id The ID of the billing to be retrieved.
      * @return ?Billing Returns the billing object if found, null otherwise.
      */
-    public function findBillingById(int $id): ?Billing {
+    public function getBillingById(int $id): ?Billing {
         $sql = "
             SELECT * FROM billing WHERE id = :id
         ";
@@ -154,5 +155,82 @@ class BillingCrud {
     
         // No billing found
         return null;
+    }
+
+    /**
+     * Retrieves all payments associated with a specific contract.
+     *
+     * This method fetches all payments linked to a given contract ID 
+     * and returns them as an array of `Billing` objects.
+     * 
+     * @param int $contract_id The unique identifier of the contract.
+     * 
+     * @return Billing[] An array of `Billing` objects representing the payments 
+     *                   associated with the specified contract.
+     *
+     */
+    public function getPaymentsByContractId (int $contract_id): array {
+        $sql = "SELECT * FROM billing WHERE contract_id = :contract_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':contract_id', $contract_id);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        print_r($results); 
+        return array_map(fn($data) => new Billing($data), $results);
+    }
+
+    /**
+     * Checks if a contract is fully paid.
+     *
+     * This method verifies whether the total payments made for a given contract 
+     * are equal to or greater than the contract's price.
+     *
+     * @param int $contractId The unique identifier of the contract.
+     * 
+     * @return bool Returns `true` if the contract is fully paid, otherwise `false`.
+     *
+     */
+    public function isContractFullyPaid(int $contractId): bool {
+        $sql = "SELECT c.price, COALESCE(SUM(b.amount),0) AS total_payments 
+                FROM contract c
+                LEFT JOIN billing b ON c.id = b.contract_id
+                WHERE c.id = :contract_id
+                GROUP BY c.id";
+    
+        // Préparation de la requête
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':contract_id', $contractId);
+        $stmt->execute();
+        
+        // Récupérer les résultats
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            // Si le contrat n'existe pas dans la base de données
+            throw new Exception("Le contrat avec l'ID $contractId n'existe pas.");
+        }
+    
+        // Vérification si la somme des paiements est égale ou supérieure au prix
+        return $result['total_payments'] >= $result['price'];
+    }
+
+    /**
+     * Retrieves a list of contracts that are not fully paid.
+     *
+     * This method returns all contracts where the total payments made are less than the contract price.
+     *
+     * @return Contract[] An array of `Contract` objects representing unpaid contracts.
+     * 
+     */
+    public function getUnpaidContract(): array {
+        $sql = "SELECT c.*, COALESCE(SUM(b.amount),0) AS total_payments
+                FROM contract c
+                LEFT JOIN billing b ON c.id = b.contract_id
+                GROUP BY c.id
+                HAVING total_payments < c.price";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array_map(fn($data) => new Contract($data), $results);
     }
 }
