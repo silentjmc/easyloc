@@ -21,6 +21,25 @@ class Billing {
      */
     private $amount;
 
+    public function __construct(array $data = []) {
+        $this->hydrate($data);
+    }
+
+    public function hydrate(array $data): void {
+        foreach ($data as $key => $value) {
+            // Convert snake_case to camelCase (e.g., vehicle_uid -> vehicleUid)
+            $camelCaseKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+    
+            // Find the setter
+            $method = 'set' . ucfirst($camelCaseKey); 
+            
+            if (method_exists($this, $method)) {
+                $this->$method($value);
+            }
+        }
+    }
+
+
     // Getters
     /**
      * Get the unique identifier of the payment.
