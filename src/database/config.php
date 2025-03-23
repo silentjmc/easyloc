@@ -26,3 +26,10 @@ $mysql_config = [
     'password' => '',
     'database' => 'easyloc'
 ];
+
+$mongodb_config = [
+    'instance' => 'localhost',
+    'user' => '',
+    'password' => '',
+    'database' => 'easyloc'
+];
